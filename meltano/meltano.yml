@@ -1,0 +1,40 @@
+version: 1
+send_anonymous_usage_stats: true
+project_id: c2c7d1f0-3cd5-4c3f-aac3-af929959c6c7
+plugins:
+  extractors:
+  - name: tap-rest-api-msdk
+    namespace: tap_rest_api_msdk
+    pip_url: git+https://github.com/Widen/tap-rest-api-msdk.git
+    executable: tap-rest-api-msdk
+    capabilities:
+    - state
+    - catalog
+    - discover
+    config:
+      api_url: https://earthquake.usgs.gov/fdsnws
+      streams_config:
+      - name: us_earthquakes
+        path: /event/1/query
+        params:
+          format: geojson
+          starttime: '2014-01-01'
+          endtime: '2014-01-02'
+          minmagnitude: 1
+        primary_keys:
+        - id
+        records_path: $.features[*]
+    select:
+    - '*.*'
+  - name: tap-gitlab
+    variant: meltanolabs
+    pip_url: git+https://github.com/MeltanoLabs/tap-gitlab.git
+    config:
+      projects: meltano/meltano
+      start_date: '2020-10-01T00:00:00Z'
+    select:
+    - 'users.*'
+  loaders:
+  - name: target-jsonl
+    variant: andyh1203
+    pip_url: target-jsonl
